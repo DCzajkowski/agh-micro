@@ -1,4 +1,5 @@
 #include <LiquidCrystal.h>
+#include <time.h>
 
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
 
@@ -16,7 +17,9 @@ int cursor_position = 0;
 int cursor_moved_x = 0;
 int cursor_moved_y = 0;
 int is_active = 0;
-int couting_speed = 1;
+double counting_speed = 1;
+unsigned long last_time = millis();
+unsigned long last_time_change_delay = millis();
 
 //byte arrow[8] = {
 //  B01110,
@@ -179,18 +182,30 @@ void activate() {
 }
 
 void handle_movement_when_counting() {
-  if (y > Y_MIDDLE + TOLERANCE) {
-      counting_speed += 0.01;
-  }
+  int y = analogRead(A1);
+  unsigned long newtime = millis();
   
-  if (y < Y_MIDDLE - TOLERANCE) {
-    counting_speed -= 0.01;
-  }  
+  //Serial.println(newtime - last_time_change_delay);
+  if (newtime >= last_time_change_delay + 160){
+    Serial.println(counting_speed);
+     if (y > Y_MIDDLE + TOLERANCE) {
+        counting_speed *= 0.98;
+        last_time_change_delay = newtime;
+    }
+    
+    if (y < Y_MIDDLE - TOLERANCE) {
+      counting_speed *= 1.02;
+      last_time_change_delay = newtime;
+    }  
+    
+  }
 }
 
 void setup() {
   lcd.createChar(0, arrow);
   lcd.begin(8, 2); //Deklaracja typu
+  Serial.begin(9600);
+
 
   pinMode(A2, INPUT);//ustawiamy pin A3 jako wejście pod przycisk i włączamy podciąganie  
   digitalWrite(A2, HIGH);  
@@ -200,10 +215,17 @@ void setup() {
  
 void loop() {
   if (is_active == 2) {
-    duration -= 1;
-    print_time();
     handle_movement_when_counting();
-    delay(1000);
+    unsigned long newtime = millis();
+    if (newtime >= last_time + max(counting_speed,0.01)*1000){
+      //Serial.println(counting_speed);
+      duration -= 1;
+      last_time = newtime;
+      print_time();
+
+    }
+    
+
   } else if (is_active == 1) {
     handle_movement(); 
     handle_change();
