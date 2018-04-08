@@ -4,14 +4,13 @@ LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
 
 const int X_MIDDLE = 560;
 const int Y_MIDDLE = 543;
-const int TOLERANCE = 200;
+const int TOLERANCE = 300;
 const int BUTTON_PRESSED = 0;
 const int BUTTON_UNPRESSED = 1;
+const int MAX_DURATION = 5999; // 99 minutes and 59 seconds
+const int MIN_DURATION = 0;
 
-int m0 = 0;
-int m1 = 0;
-int s0 = 0;
-int s1 = 0;
+int duration = 0;
 int cursor_position = 0;
 int cursor_moved_x = 0;
 int cursor_moved_y = 0;
@@ -19,12 +18,21 @@ int is_active = 0;
 
 void print_time() {
   lcd.setCursor(0, 0);
+
+  int seconds = duration % 60;
+  int minutes = (duration - seconds) / 60;
   
-  lcd.print(m0);
-  lcd.print(m1);
+  if (minutes < 10) {
+    lcd.print("0");  
+  }
+  lcd.print(minutes);
+  
   lcd.print(":");
-  lcd.print(s0);
-  lcd.print(s1); 
+  
+  if (seconds < 10) {
+    lcd.print("0");  
+  }
+  lcd.print(seconds);
 
   lcd.setCursor(cursor_position, 0);
 }
@@ -69,35 +77,28 @@ void handle_movement() {
   }
 }
 
-int get_current_digit() {
+
+/** @param int flag: 1 to add, -1 to subtract */
+void change_time(int flag) {
+  int newDuration = duration;
+  
   switch (cursor_position) {
     case 0:
-      return m0;
+      newDuration += flag * 600;
+      break;
     case 1:
-      return m1;
+      newDuration += flag * 60;
+      break;
     case 3:
-      return s0;
+      newDuration += flag * 10;
+      break;
     case 4:
-      return s1;
+      newDuration += flag * 1;
+      break;
   }
 
-  return -1;
-}
-
-void set_current_digit(int d) {
-  switch (cursor_position) {
-    case 0:
-      m0 = d;
-      break;
-    case 1:
-      m1 = d;
-      break;
-    case 3:
-      s0 = d;
-      break;
-    case 4:
-      s1 = d;
-      break;
+  if (newDuration >= 0 && newDuration <= MAX_DURATION) {
+    duration = newDuration;
   }
 }
 
@@ -105,14 +106,14 @@ void handle_change() {
   int y = analogRead(A1);
 
   if (cursor_moved_y == 0) {
-    if (y > Y_MIDDLE + TOLERANCE && get_current_digit() > 0) {
-      set_current_digit(get_current_digit() - 1);
+    if (y > Y_MIDDLE + TOLERANCE) {
+      change_time(-1);
       cursor_moved_y = 1;
       print_time();
     }
   
-    if (y < Y_MIDDLE - TOLERANCE && get_current_digit() < 9) {
-      set_current_digit(get_current_digit() + 1);
+    if (y < Y_MIDDLE - TOLERANCE) {
+      change_time(1);
       cursor_moved_y = 1;
       print_time();
     }  
