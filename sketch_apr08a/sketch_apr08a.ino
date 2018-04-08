@@ -16,6 +16,7 @@ int cursor_position = 0;
 int cursor_moved_x = 0;
 int cursor_moved_y = 0;
 int is_active = 0;
+int couting_speed = 1;
 
 //byte arrow[8] = {
 //  B01110,
@@ -57,8 +58,10 @@ void print_time() {
   }
   lcd.print(seconds);
 
-  lcd.print(" ");
-  lcd.write(byte(0));
+  if (is_active == 1) {
+    lcd.print(" ");
+    lcd.write(byte(0));  
+  }
 
   lcd.setCursor(cursor_position + TIME_DISPLAY_OFFSET_LEFT, 1);
 }
@@ -76,18 +79,18 @@ void handle_movement() {
       cursor_position -= 1;
       cursor_moved_x = 1;
 
-      if (cursor_position == 2) {
+      if (cursor_position == 2 || cursor_position == 5) {
         cursor_position -= 1;  
       }
       
       print_cursor();
     }
   
-    if (x < X_MIDDLE - TOLERANCE && cursor_position < 4) {
+    if (x < X_MIDDLE - TOLERANCE && cursor_position < 6) {
       cursor_position += 1;
       cursor_moved_x = 1;
 
-      if (cursor_position == 2) {
+      if (cursor_position == 2 || cursor_position == 5) {
         cursor_position += 1;  
       }
       
@@ -153,6 +156,16 @@ void handle_change() {
   }
 }
 
+void handle_click() {
+  if (cursor_position == 6 && digitalRead(A2) == BUTTON_PRESSED) {
+    is_active = 2;
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Boom in");
+    lcd.noCursor();
+  }
+}
+
 void activate() {
   if (digitalRead(A2) == BUTTON_PRESSED) {
     is_active = 1; 
@@ -163,6 +176,16 @@ void activate() {
     print_time();
     print_cursor();
   }
+}
+
+void handle_movement_when_counting() {
+  if (y > Y_MIDDLE + TOLERANCE) {
+      counting_speed += 0.01;
+  }
+  
+  if (y < Y_MIDDLE - TOLERANCE) {
+    counting_speed -= 0.01;
+  }  
 }
 
 void setup() {
@@ -176,9 +199,15 @@ void setup() {
 }
  
 void loop() {
-  if (is_active == 1) {
+  if (is_active == 2) {
+    duration -= 1;
+    print_time();
+    handle_movement_when_counting();
+    delay(1000);
+  } else if (is_active == 1) {
     handle_movement(); 
     handle_change();
+    handle_click();
   } else {
     activate();
   }
