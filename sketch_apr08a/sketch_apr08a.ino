@@ -22,7 +22,7 @@ void print_time() {
   
   lcd.print(m0);
   lcd.print(m1);
-//  lcd.print(":");
+  lcd.print(":");
   lcd.print(s0);
   lcd.print(s1); 
 
@@ -44,7 +44,7 @@ void handle_movement() {
       print_cursor();
     }
   
-    if (x < X_MIDDLE - TOLERANCE && cursor_position < 3) {
+    if (x < X_MIDDLE - TOLERANCE && cursor_position < 4) {
       cursor_position += 1;
       cursor_moved_x = 1;
       print_cursor();
@@ -65,9 +65,9 @@ int get_current_digit() {
       return m0;
     case 1:
       return m1;
-    case 2:
-      return s0;
     case 3:
+      return s0;
+    case 4:
       return s1;
   }
 
@@ -82,10 +82,10 @@ void set_current_digit(int d) {
     case 1:
       m1 = d;
       break;
-    case 2:
+    case 3:
       s0 = d;
       break;
-    case 3:
+    case 4:
       s1 = d;
       break;
   }
