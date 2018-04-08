@@ -175,7 +175,6 @@ void handle_movement_when_counting() {
   int y = analogRead(A1);
   unsigned long newtime = millis();
 
-  //Serial.println(newtime - last_time_change_delay);
   if (newtime >= last_time_change_delay + 160){
     Serial.println(counting_speed);
      if (y > Y_MIDDLE + TOLERANCE) {
@@ -187,17 +186,15 @@ void handle_movement_when_counting() {
       counting_speed *= 1.02;
       last_time_change_delay = newtime;
     }
-
   }
 }
 
 void setup() {
   lcd.createChar(0, skull);
-  lcd.begin(8, 2); //Deklaracja typu
+  lcd.begin(8, 2);
   Serial.begin(9600);
 
-
-  pinMode(A2, INPUT);//ustawiamy pin A3 jako wejście pod przycisk i włączamy podciąganie
+  pinMode(A2, INPUT);
   digitalWrite(A2, HIGH);
   pinMode(A1, INPUT); // y
   pinMode(A0, INPUT); // x
@@ -208,21 +205,19 @@ void loop() {
   if (is_active == 2) {
     handle_movement_when_counting();
     unsigned long newtime = millis();
-    if (newtime >= last_time + max(counting_speed,0.01)*1000){
-      //Serial.println(counting_speed);
+
+    if (newtime >= last_time + max(counting_speed, 0.01) * 1000){
       duration -= 1;
       last_time = newtime;
       print_time();
-
     }
+
     if (duration==0){
       is_active = 3;
       lcd.clear();
       lcd.print("BOOM! ");
       digitalWrite(8, 10);
     }
-
-
   } else if (is_active == 1) {
     handle_movement();
     handle_change();
@@ -231,5 +226,3 @@ void loop() {
     activate();
   }
 }
-
-
