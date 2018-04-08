@@ -9,6 +9,7 @@ const int BUTTON_PRESSED = 0;
 const int BUTTON_UNPRESSED = 1;
 const int MAX_DURATION = 5999; // 99 minutes and 59 seconds
 const int MIN_DURATION = 0;
+const int TIME_DISPLAY_OFFSET_LEFT = 1;
 
 int duration = 0;
 int cursor_position = 0;
@@ -16,11 +17,33 @@ int cursor_moved_x = 0;
 int cursor_moved_y = 0;
 int is_active = 0;
 
+//byte arrow[8] = {
+//  B01110,
+//  B11111,
+//  B10101,
+//  B11111,
+//  B01010,
+//  B10101,
+//  B11111,
+//};
+
+byte arrow[8] = {
+  B00000,
+  B01110,
+  B11111,
+  B10101,
+  B11111,
+  B01010,
+  B00000,
+};
+
 void print_time() {
-  lcd.setCursor(0, 0);
+  lcd.setCursor(0, 1);
 
   int seconds = duration % 60;
   int minutes = (duration - seconds) / 60;
+
+  lcd.print(" ");
   
   if (minutes < 10) {
     lcd.print("0");  
@@ -34,11 +57,14 @@ void print_time() {
   }
   lcd.print(seconds);
 
-  lcd.setCursor(cursor_position, 0);
+  lcd.print(" ");
+  lcd.write(byte(0));
+
+  lcd.setCursor(cursor_position + TIME_DISPLAY_OFFSET_LEFT, 1);
 }
 
 void print_cursor() {
-  lcd.setCursor(cursor_position, 0);
+  lcd.setCursor(cursor_position + TIME_DISPLAY_OFFSET_LEFT, 1);
   lcd.cursor();
 }
 
@@ -130,12 +156,17 @@ void handle_change() {
 void activate() {
   if (digitalRead(A2) == BUTTON_PRESSED) {
     is_active = 1; 
+    
+    lcd.setCursor(0, 0);
+    lcd.print("Set time");
+    
     print_time();
     print_cursor();
   }
 }
 
 void setup() {
+  lcd.createChar(0, arrow);
   lcd.begin(8, 2); //Deklaracja typu
 
   pinMode(A2, INPUT);//ustawiamy pin A3 jako wejście pod przycisk i włączamy podciąganie  
