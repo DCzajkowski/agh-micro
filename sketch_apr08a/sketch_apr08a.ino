@@ -211,6 +211,7 @@ void setup() {
   digitalWrite(A2, HIGH);  
   pinMode(A1, INPUT); // y
   pinMode(A0, INPUT); // x 
+  pinMode(8,OUTPUT);
 }
  
 void loop() {
@@ -223,6 +224,12 @@ void loop() {
       last_time = newtime;
       print_time();
 
+    }
+    if (duration==0){
+      is_active = 3;
+      lcd.clear();
+      lcd.print("BOOM! ");
+      digitalWrite(8, 10);
     }
     
 
