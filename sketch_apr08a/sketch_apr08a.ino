@@ -41,12 +41,22 @@ void handle_movement() {
     if (x > X_MIDDLE + TOLERANCE && cursor_position > 0) {
       cursor_position -= 1;
       cursor_moved_x = 1;
+
+      if (cursor_position == 2) {
+        cursor_position -= 1;  
+      }
+      
       print_cursor();
     }
   
     if (x < X_MIDDLE - TOLERANCE && cursor_position < 4) {
       cursor_position += 1;
       cursor_moved_x = 1;
+
+      if (cursor_position == 2) {
+        cursor_position += 1;  
+      }
+      
       print_cursor();
     }  
   }
