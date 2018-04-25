@@ -1,5 +1,4 @@
 #include <LiquidCrystal.h>
-#include <time.h>
 
 LiquidCrystal lcd(2, 3, 4, 5, 6, 7);
 
@@ -10,13 +9,13 @@ const int BUTTON_PRESSED = 0;
 const int BUTTON_UNPRESSED = 1;
 const int MAX_DURATION = 5999; // 99 minutes and 59 seconds
 const int MIN_DURATION = 0;
-const int TIME_DISPLAY_OFFSET_LEFT = 1;
+const int TIME_DISPLAY_OFFSET_LEFT = 1; // nr of charactes before the time
 
-int duration = 0;
+int duration = 0; // set-up/elapsed time
 int cursor_position = 0;
 int cursor_moved_x = 0;
 int cursor_moved_y = 0;
-int is_active = 0;
+int mode = 0;
 double counting_speed = 1;
 unsigned long last_time = millis();
 unsigned long last_time_change_delay = millis();
@@ -51,7 +50,7 @@ void print_time() {
   }
   lcd.print(seconds);
 
-  if (is_active == 1) {
+  if (mode == 1) {
     lcd.print(" ");
     lcd.write(byte(0));
   }
@@ -98,7 +97,6 @@ void handle_movement() {
     }
   }
 }
-
 
 /** @param int flag: 1 to add, -1 to subtract */
 void change_time(int flag) {
@@ -151,7 +149,7 @@ void handle_change() {
 
 void handle_click() {
   if (cursor_position == 6 && digitalRead(A2) == BUTTON_PRESSED) {
-    is_active = 2;
+    mode = 2;
     lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("Boom in");
@@ -161,7 +159,7 @@ void handle_click() {
 
 void activate() {
   if (digitalRead(A2) == BUTTON_PRESSED) {
-    is_active = 1;
+    mode = 1;
 
     lcd.setCursor(0, 0);
     lcd.print("Set time");
@@ -177,9 +175,9 @@ void handle_movement_when_counting() {
 
   if (newtime >= last_time_change_delay + 160){
     Serial.println(counting_speed);
-     if (y > Y_MIDDLE + TOLERANCE) {
-        counting_speed *= 0.98;
-        last_time_change_delay = newtime;
+    if (y > Y_MIDDLE + TOLERANCE) {
+      counting_speed *= 0.98;
+      last_time_change_delay = newtime;
     }
 
     if (y < Y_MIDDLE - TOLERANCE) {
@@ -202,8 +200,22 @@ void setup() {
 }
 
 void loop() {
-  if (is_active == 2) {
+  /* Inactive state */
+  if (mode == 0) {
+    activate();
+  }
+
+  /* Set-up phase */
+  if (mode == 1) {
+    handle_movement(); // x
+    handle_change(); // y
+    handle_click(); // press
+  }
+
+  /* Counting down */
+  if (mode == 2) {
     handle_movement_when_counting();
+
     unsigned long newtime = millis();
 
     if (newtime >= last_time + max(counting_speed, 0.01) * 1000){
@@ -212,17 +224,11 @@ void loop() {
       print_time();
     }
 
-    if (duration==0){
-      is_active = 3;
+    if (duration == 0){
+      mode = 3;
       lcd.clear();
       lcd.print("BOOM! ");
-      digitalWrite(8, 10);
+      digitalWrite(8, 10); // Light-up LEDs
     }
-  } else if (is_active == 1) {
-    handle_movement();
-    handle_change();
-    handle_click();
-  } else {
-    activate();
   }
 }
