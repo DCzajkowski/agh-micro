@@ -230,4 +230,15 @@ void loop() {
       digitalWrite(8, 10); // Light-up LEDs
     }
   }
+
+  if (mode == 3) {
+    if (digitalRead(A2) == BUTTON_PRESSED) {
+      duration = 0;
+      cursor_position = 0;
+      cursor_moved_x = 0;
+      cursor_moved_y = 0;
+      counting_speed = 1;
+      mode = 0;
+    }
+  }
 }
