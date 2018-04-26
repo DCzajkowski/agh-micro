@@ -173,8 +173,7 @@ void handle_movement_when_counting() {
   int y = analogRead(A1);
   unsigned long newtime = millis();
 
-  if (newtime >= last_time_change_delay + 160){
-    Serial.println(counting_speed);
+  if (newtime >= last_time_change_delay + 160) {
     if (y > Y_MIDDLE + TOLERANCE) {
       counting_speed *= 0.98;
       last_time_change_delay = newtime;
@@ -218,13 +217,13 @@ void loop() {
 
     unsigned long newtime = millis();
 
-    if (newtime >= last_time + max(counting_speed, 0.01) * 1000){
+    if (newtime >= last_time + max(counting_speed, 0.01) * 1000) {
       duration -= 1;
       last_time = newtime;
       print_time();
     }
 
-    if (duration == 0){
+    if (duration == 0) {
       mode = 3;
       lcd.clear();
       lcd.print("BOOM! ");
