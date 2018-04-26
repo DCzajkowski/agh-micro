@@ -195,7 +195,7 @@ void setup() {
   digitalWrite(A2, HIGH);
   pinMode(A1, INPUT); // y
   pinMode(A0, INPUT); // x
-  pinMode(8,OUTPUT);
+  pinMode(8, OUTPUT);
 }
 
 void loop() {
